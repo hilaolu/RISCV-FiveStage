@@ -24,6 +24,9 @@ class DMEM extends MultiIOModule {
       val dataAddress = Input(UInt(12.W))
 
       val dataOut     = Output(UInt(32.W))
+      
+      
+      
     })
 
   val data = SyncReadMem(4096, UInt(32.W))

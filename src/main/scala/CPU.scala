@@ -28,8 +28,10 @@ class CPU extends MultiIOModule {
 
   val ID  = Module(new InstructionDecode)
   val IF  = Module(new InstructionFetch)
-  // val EX  = Module(new Execute)
+  val EX  = Module(new Execute)
   val MEM = Module(new MemoryFetch)
+  
+  
   // val WB  = Module(new Execute) (You may not need this one?)
 
 
@@ -54,4 +56,16 @@ class CPU extends MultiIOModule {
   /**
     TODO: Your code here
     */
+    
+    ID.io.INS:=IF.io.INS
+    ID.io.wdata:=EX.io.wdata
+    ID.io.waddr:=EX.io.waddr
+    
+    EX.io.op_0:=ID.io.op_0
+    EX.io.op_1:=ID.io.op_1
+    EX.io.alu_op:=ID.io.alu_op
+    EX.io.dst:=ID.io.dst
+    
+    
+    
 }
