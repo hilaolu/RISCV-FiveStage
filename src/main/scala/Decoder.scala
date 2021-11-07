@@ -15,16 +15,16 @@ import chisel3.util.ListLookup
  */
 class Decoder() extends Module {
 
-  val io = IO(new Bundle {
-                val instruction    = Input(new Instruction)
+    val io = IO(new Bundle {
+        val instruction    = Input(new Instruction)
 
-                val controlSignals = Output(new ControlSignals)
-                val branchType     = Output(UInt(3.W))
-                val op1Select      = Output(UInt(1.W))
-                val op2Select      = Output(UInt(1.W))
-                val immType        = Output(UInt(3.W))
-                val ALUop          = Output(UInt(4.W))
-              })
+        val controlSignals = Output(new ControlSignals)
+        val branchType     = Output(UInt(3.W))
+        val op1Select      = Output(UInt(1.W))
+        val op2Select      = Output(UInt(1.W))
+        val immType        = Output(UInt(3.W))
+        val ALUop          = Output(UInt(4.W))
+    })
 
   import lookup._
   import Op1Select._
@@ -44,28 +44,35 @@ class Decoder() extends Module {
     *
     * `a -> b` == `(a, b)` == `Tuple2(a, b)`
     */
-  val opcodeMap: Array[(BitPat, List[UInt])] = Array(
+    val opcodeMap: Array[(BitPat, List[UInt])] = Array(
 
-    // signal      regWrite, memRead, memWrite, branch,  jump, branchType,    Op1Select, Op2Select, ImmSelect,    ALUOp
-    LW     -> List(Y,        Y,       N,        N,       N,    branchType.DC, rs1,       imm,       ITYPE,        ALUOps.ADD),
+        // signal      regWrite, memRead, memWrite, branch,  jump, branchType,    Op1Select, Op2Select, ImmSelect,    ALUOp
+        LW     -> List(Y,        Y,       N,        N,       N,    branchType.DC, rs1,       imm,       ITYPE,        ALUOps.ADD),
 
-    SW     -> List(N,        N,       Y,        N,       N,    branchType.DC, rs1,       imm,       STYPE,        ALUOps.ADD),
+        SW     -> List(N,        N,       Y,        N,       N,    branchType.DC, rs1,       imm,       STYPE,        ALUOps.ADD),
+        // 
+        ADD    -> List(Y,        N,       N,        N,       N,    branchType.DC, rs1,       rs2,       ImmFormat.DC, ALUOps.ADD),
+        SUB    -> List(Y,        N,       N,        N,       N,    branchType.DC, rs1,       rs2,       ImmFormat.DC, ALUOps.SUB),
 
-    ADD    -> List(Y,        N,       N,        N,       N,    branchType.DC, rs1,       rs2,       ImmFormat.DC, ALUOps.ADD),
-    SUB    -> List(Y,        N,       N,        N,       N,    branchType.DC, rs1,       rs2,       ImmFormat.DC, ALUOps.SUB),
-
+        ADDI   -> List(Y,        N,       N,        N,       N,    branchType.DC, rs1,       imm,       SIMM,         ALUOps.ADD),
     /**
       TODO: Fill in the blanks
       */
     )
 
 
-  val NOP = List(N, N, N, N, N, branchType.DC, rs1, rs2, ImmFormat.DC, ALUOps.DC)
+  val INVAILD = List(N, N, N, N, N, branchType.DC, rs1, rs2, ImmFormat.DC, ALUOps.DC)
+  
 
-  val decodedControlSignals = ListLookup(
-    io.instruction.asUInt(),
-    NOP,
+    val decodedControlSignals = ListLookup(
+        io.instruction.asUInt(),
+        INVAILD,
     opcodeMap)
+    
+    when(decodedControlSignals===INVAILD){
+        printf(Console.RED+"Error\n")
+        assert(0)
+    } 
 
   io.controlSignals.regWrite   := decodedControlSignals(0)
   io.controlSignals.memRead    := decodedControlSignals(1)
