@@ -1,6 +1,7 @@
 package FiveStage
 import chisel3._
 import chisel3.experimental.MultiIOModule
+import chisel3.util._
 
 class InstructionFetch extends MultiIOModule {
 
@@ -18,7 +19,7 @@ class InstructionFetch extends MultiIOModule {
         val ins_addr = Output(UInt())
         val ins= Output(new Instruction) 
     })
-
+    
     val IMEM = Module(new IMEM)
     val ins_addr = RegInit(UInt(30.W), 0.U)
     //addr is 30 bit!!

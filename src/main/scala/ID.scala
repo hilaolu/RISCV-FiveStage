@@ -14,10 +14,6 @@ class InstructionDecode extends MultiIOModule {
         val op_1=Output(UInt(32.W))
         
         val alu_op=Output(UInt(4.W))
-        /**
-        * TODO: Your code here.
-        */
-        
         val dst=Output(UInt(5.W))
         
         val waddr=Input(UInt(32.W))
@@ -25,28 +21,18 @@ class InstructionDecode extends MultiIOModule {
     })
 
     val registers = Module(new Registers)
-    val decoder   = Module(new Decoder).io
+    val decoder   = Module(new Decoder)
     
-    val ins=io.INS
+    val ins=io.ins
     
     io.dst:=ins.registerRd
     
     val simm=Wire(SInt(32.W))
     simm:=ins.immediateIType
     
-    
     io.op_0:=simm.asUInt
     io.op_1:=registers.io.readData1
-  
-    /**
-    * Setup. You should not change this code
-    */
-    registers.testHarness.setup := testHarness.registerSetup
     
-    
-    /**
-    * TODO: Your code here.
-    */
     registers.io.readAddress1 := ins.registerRs1 
     registers.io.readAddress2 := 0.U
     registers.io.writeEnable  := true.B
@@ -55,7 +41,7 @@ class InstructionDecode extends MultiIOModule {
     
     io.alu_op:=ALUOps.ADD
     
-    decoder.instruction := 0.U.asTypeOf(new Instruction)
+    decoder.io.ins := 0.U.asTypeOf(new Instruction)
     
     // Don't touch the test harness
     val testHarness = IO(
@@ -66,6 +52,7 @@ class InstructionDecode extends MultiIOModule {
     })
     testHarness.registerPeek    := registers.io.readData1
     testHarness.testUpdates     := registers.testHarness.testUpdates
+    registers.testHarness.setup := testHarness.registerSetup
 }
 
 

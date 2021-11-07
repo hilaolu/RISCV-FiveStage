@@ -68,7 +68,7 @@ object branchType {
   val gteu = 4.asUInt(3.W)
   val ltu  = 5.asUInt(3.W)
   val jump = 6.asUInt(3.W)
-  val DC   = 0.asUInt(3.W)
+  // val DC   = 0.asUInt(3.W)
 }
 
 
@@ -79,18 +79,27 @@ object branchType {
   You can choose to instead do this in the execute stage, and you may forego
   using them altogether.
   */
-object Op1Select {
-  val rs1 = 0.asUInt(1.W)
+object Op0Select {
+  val RS1 = 0.asUInt(1.W)
   val PC  = 1.asUInt(1.W)
-  val DC  = 0.asUInt(1.W)
+  // val DC  = 0.asUInt(1.W)
 }
 
-object Op2Select {
-  val rs2 = 0.asUInt(1.W)
-  val imm = 1.asUInt(1.W)
-  val DC  = 0.asUInt(1.W)
+object Op1Select {
+  val RS2 = 0.asUInt(1.W)
+  val IMM = 1.asUInt(1.W)
+  // val DC  = 0.asUInt(1.W)
 }
 
+object YN{
+    val N = 0.U(1.W) 
+    val Y = 0.U(1.W) 
+}
+
+
+object DC{
+    val DC=0.U
+}
 
 /**
   Used in the decoder
@@ -102,7 +111,7 @@ object ImmFormat {
   val UTYPE  = 3.asUInt(3.W)
   val JTYPE  = 4.asUInt(3.W)
   val SHAMT  = 5.asUInt(3.W)
-  val DC     = 0.asUInt(3.W)
+  // val DC     = 0.asUInt(3.W)
 }
 
 
@@ -120,5 +129,5 @@ object ALUOps {
   val COPY_A = 10.U(4.W)
   val COPY_B = 11.U(4.W)
 
-  val DC     = 15.U(4.W)
+  // val DC     = 15.U(4.W)
 }

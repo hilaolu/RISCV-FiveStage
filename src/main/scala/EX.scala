@@ -7,15 +7,6 @@ import FiveStage.ALUOps._
 
 class Execute extends MultiIOModule {
 
-  // Don't touch
-  // val testHarness = IO(
-  //   new Bundle {
-  //     val IMEMsetup = Input(new IMEMsetupSignals)
-  //     val PC        = Output(UInt())
-  //   }
-  // )
-
-
   val io = IO(
     new Bundle {
         val op_0 = Input(UInt(32.W)) 

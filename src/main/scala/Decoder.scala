@@ -3,86 +3,63 @@ import chisel3._
 import chisel3.util.BitPat
 import chisel3.util.ListLookup
 
-
-/**
-  * This module is mostly done, but you will have to fill in the blanks in opcodeMap.
-  * You may want to add more signals to be decoded in this module depending on your
-  * design if you so desire.
-  *
-  * In the "classic" 5 stage decoder signals such as op1select and immType
-  * are not included, however I have added them to my design, and similarily you might
-  * find it useful to add more
- */
 class Decoder() extends Module {
 
     val io = IO(new Bundle {
-        val instruction    = Input(new Instruction)
+        val ins = Input(new Instruction)
 
-        val controlSignals = Output(new ControlSignals)
-        val branchType     = Output(UInt(3.W))
-        val op1Select      = Output(UInt(1.W))
-        val op2Select      = Output(UInt(1.W))
-        val immType        = Output(UInt(3.W))
-        val ALUop          = Output(UInt(4.W))
+        val ctrl_signal    = Output(new ControlSignals)
+        val branch_type    = Output(UInt(3.W))
+        val op_0_type      = Output(UInt(1.W))
+        val op_1_type      = Output(UInt(1.W))
+        val alu_op         = Output(UInt(4.W))
     })
 
-  import lookup._
-  import Op1Select._
-  import Op2Select._
-  import branchType._
-  import ImmFormat._
-
-  val N = 0.asUInt(1.W)
-  val Y = 1.asUInt(1.W)
-
-  /**
-    * In scala we sometimes (ab)use the `->` operator to create tuples.
-    * The reason for this is that it serves as convenient sugar to make maps.
-    *
-    * This doesn't matter to you, just fill in the blanks in the style currently
-    * used, I just want to demystify some of the scala magic.
-    *
-    * `a -> b` == `(a, b)` == `Tuple2(a, b)`
-    */
+    import lookup._
+    import Op0Select._
+    import Op1Select._
+    // import branchType._
+    import ImmFormat._
+    import YN._
+    import DC.DC
+    
+    
     val opcodeMap: Array[(BitPat, List[UInt])] = Array(
 
-        // signal      regWrite, memRead, memWrite, branch,  jump, branchType,    Op1Select, Op2Select, ImmSelect,    ALUOp
-        LW     -> List(Y,        Y,       N,        N,       N,    branchType.DC, rs1,       imm,       ITYPE,        ALUOps.ADD),
-
-        SW     -> List(N,        N,       Y,        N,       N,    branchType.DC, rs1,       imm,       STYPE,        ALUOps.ADD),
-        // 
-        ADD    -> List(Y,        N,       N,        N,       N,    branchType.DC, rs1,       rs2,       ImmFormat.DC, ALUOps.ADD),
-        SUB    -> List(Y,        N,       N,        N,       N,    branchType.DC, rs1,       rs2,       ImmFormat.DC, ALUOps.SUB),
-
-        ADDI   -> List(Y,        N,       N,        N,       N,    branchType.DC, rs1,       imm,       SIMM,         ALUOps.ADD),
-    /**
-      TODO: Fill in the blanks
-      */
+        // signal      regWrite, memRead, memWrite, branch,  jump, branchType,Op1Select, Op2Select, ImmSelect, ALUOp
+        LW     -> List(Y,        Y,       N,        N,       N,    DC,        RS1,       IMM,       ITYPE,     ALUOps.ADD),
+        SW     -> List(N,        N,       Y,        N,       N,    DC,        RS1,       IMM,       STYPE,     ALUOps.ADD),
+        //     
+        ADD    -> List(Y,        N,       N,        N,       N,    DC,        RS1,       RS2,       DC,        ALUOps.ADD),
+        SUB    -> List(Y,        N,       N,        N,       N,    DC,        RS1,       RS2,       DC,        ALUOps.SUB),
+        ADDI   -> List(Y,        N,       N,        N,       N,    DC,        RS1,       IMM,       STYPE,     ALUOps.ADD),
     )
 
 
-  val INVAILD = List(N, N, N, N, N, branchType.DC, rs1, rs2, ImmFormat.DC, ALUOps.DC)
-  
+    val INVAILD = List(N, N, N, N, N, DC, DC, DC, DC, DC)
 
     val decodedControlSignals = ListLookup(
-        io.instruction.asUInt(),
+        io.ins.asUInt(),
         INVAILD,
-    opcodeMap)
+        opcodeMap
+    )
     
-    when(decodedControlSignals===INVAILD){
+    if(decodedControlSignals.equals(INVAILD)){
         printf(Console.RED+"Error\n")
-        assert(0)
+        assert(false.B)
     } 
+    
+    
 
-  io.controlSignals.regWrite   := decodedControlSignals(0)
-  io.controlSignals.memRead    := decodedControlSignals(1)
-  io.controlSignals.memWrite   := decodedControlSignals(2)
-  io.controlSignals.branch     := decodedControlSignals(3)
-  io.controlSignals.jump       := decodedControlSignals(4)
-
-  io.branchType := decodedControlSignals(5)
-  io.op1Select  := decodedControlSignals(6)
-  io.op2Select  := decodedControlSignals(7)
-  io.immType    := decodedControlSignals(8)
-  io.ALUop      := decodedControlSignals(9)
+    io.ctrl_signal.regWrite   := decodedControlSignals(0)
+    io.ctrl_signal.memRead    := decodedControlSignals(1)
+    io.ctrl_signal.memWrite   := decodedControlSignals(2)
+    io.ctrl_signal.branch     := decodedControlSignals(3)
+    io.ctrl_signal.jump       := decodedControlSignals(4)
+    
+    io.ctrl_signal:= decodedControlSignals(5).asTypeOf(new ControlSignals)
+    io.op_0_type  := decodedControlSignals(6)
+    io.op_1_type  := decodedControlSignals(7)
+    io.branch_type:= decodedControlSignals(8)
+    io.alu_op     := decodedControlSignals(9)
 }
