@@ -23,12 +23,12 @@ class InstructionFetch extends MultiIOModule {
     */
   val io = IO(
     new Bundle {
-      val PC = Output(UInt())
-      val INS= Output(new Instruction) 
+      val ins_addr = Output(UInt())
+      val ins= Output(new Instruction) 
     })
 
   val IMEM = Module(new IMEM)
-  val PC   = RegInit(UInt(32.W), 0.U)
+  val ins_addr = RegInit(UInt(32.W), 0.U)
 
 
   /**
@@ -43,21 +43,21 @@ class InstructionFetch extends MultiIOModule {
     * 
     * You should expand on or rewrite the code below.
     */
-  io.PC := PC
-  IMEM.io.instructionAddress := PC
+  io.ins_addr := ins_addr
+  IMEM.io.instructionAddress := ins_addr
 
-  PC := PC + 4.U
+  ins_addr := ins_addr + 4.U
 
-  val instruction = Wire(new Instruction)
-  instruction := IMEM.io.instruction.asTypeOf(new Instruction)
-  io.INS:=instruction
+  val ins = Wire(new Instruction)
+  ins := IMEM.io.instruction.asTypeOf(new Instruction)
+  io.ins:=ins
 
 
   /**
     * Setup. You should not change this code.
     */
   when(testHarness.IMEMsetup.setup) {
-    PC := 0.U
-    instruction := Instruction.NOP
+    ins_addr := 0.U
+    ins := Instruction.NOP
   }
 }

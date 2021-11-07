@@ -1,5 +1,7 @@
 package FiveStage
 
+import chisel3.ExplicitCompileOptions.Strict
+//todo avoid implicit truncation
 import chisel3._
 import chisel3.core.Input
 import chisel3.experimental.MultiIOModule
