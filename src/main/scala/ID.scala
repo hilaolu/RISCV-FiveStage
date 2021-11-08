@@ -21,12 +21,14 @@ class InstructionDecode extends MultiIOModule {
             val ins=Input(new Instruction)
         }
         
-        val op_0=Output(UInt(32.W))
-        val op_1=Output(UInt(32.W))
-        
-        val alu_op=Output(UInt(4.W))
-        val rd=Output(UInt(5.W))
-        val w_rd=Output(UInt(1.W))
+        val out=new Bundle{
+            val op_0=Output(UInt(32.W))
+            val op_1=Output(UInt(32.W))
+            
+            val alu_op=Output(UInt(4.W))
+            val rd=Output(UInt(5.W))
+            val w_rd=Output(UInt(1.W))
+        }
         
         val waddr=Input(UInt(32.W))
         val wdata=Input(UInt(32.W))
@@ -38,16 +40,18 @@ class InstructionDecode extends MultiIOModule {
     
     val ins=io.in.ins
     
-    io.rd:=ins.registerRd
+    io.out.rd:=ins.registerRd
     
     val imm_sel = Array(
         ITYPE  -> ins.immediateIType,
+        UTYPE  -> ins.immediateUType.asUInt,
         // STYPE  -> ins.immediateIType.asTypeOf(SInt(32.W)),
     )
     
     val op_0_sel = Array(
         RS1    -> registers.io.readData1,
         PC     -> 0.U,//fix me
+        Z      -> 0.U,
     )
     
     val imm=MuxLookup(decoder.io.imm_type,1919810.U,imm_sel)
@@ -58,9 +62,9 @@ class InstructionDecode extends MultiIOModule {
     )
     
     
-    io.op_0:=MuxLookup(decoder.io.op_0_type,114514.U,op_0_sel)
+    io.out.op_0:=MuxLookup(decoder.io.op_0_type,114514.U,op_0_sel)
     
-    io.op_1:=MuxLookup(decoder.io.op_1_type,114514.U,op_1_sel)
+    io.out.op_1:=MuxLookup(decoder.io.op_1_type,114514.U,op_1_sel)
     
     registers.io.readAddress1 := ins.registerRs1 
     registers.io.readAddress2 := ins.registerRs2
@@ -68,8 +72,8 @@ class InstructionDecode extends MultiIOModule {
     registers.io.writeAddress := io.waddr 
     registers.io.writeData    := io.wdata 
     
-    io.alu_op:=decoder.io.alu_op
-    io.w_rd:=decoder.io.ctrl_signal.regWrite
+    io.out.alu_op:=decoder.io.alu_op
+    io.out.w_rd:=decoder.io.ctrl_signal.regWrite
     
     decoder.io.ins := ins    
     // Don't touch the test harness

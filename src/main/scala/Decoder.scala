@@ -34,7 +34,29 @@ class Decoder() extends Module {
         //     
         ADD    -> List(Y,        N,       N,        N,       N,    DC,        RS1,       RS2,       DC,        AluOp.ADD),
         SUB    -> List(Y,        N,       N,        N,       N,    DC,        RS1,       RS2,       DC,        AluOp.SUB),
+        
+        AND    -> List(Y,        N,       N,        N,       N,    DC,        RS1,       RS2,       DC,        AluOp.AND),
+        OR     -> List(Y,        N,       N,        N,       N,    DC,        RS1,       RS2,       DC,        AluOp.OR),
+        XOR    -> List(Y,        N,       N,        N,       N,    DC,        RS1,       RS2,       DC,        AluOp.XOR),
+        
+        SLT    -> List(Y,        N,       N,        N,       N,    DC,        RS1,       RS2,       DC,        AluOp.SLT),
+        SLTU   -> List(Y,        N,       N,        N,       N,    DC,        RS1,       RS2,       DC,        AluOp.SLTU),
+        
+        SRA    -> List(Y,        N,       N,        N,       N,    DC,        RS1,       RS2,       DC,        AluOp.SRA),
+        SRL    -> List(Y,        N,       N,        N,       N,    DC,        RS1,       RS2,       DC,        AluOp.SRL),
+        SLL    -> List(Y,        N,       N,        N,       N,    DC,        RS1,       RS2,       DC,        AluOp.SLL),
+        
         ADDI   -> List(Y,        N,       N,        N,       N,    DC,        RS1,       IMM,       ITYPE,     AluOp.ADD),
+        ANDI   -> List(Y,        N,       N,        N,       N,    DC,        RS1,       IMM,       ITYPE,     AluOp.AND),
+        ORI    -> List(Y,        N,       N,        N,       N,    DC,        RS1,       IMM,       ITYPE,     AluOp.OR),
+        XORI   -> List(Y,        N,       N,        N,       N,    DC,        RS1,       IMM,       ITYPE,     AluOp.XOR),
+        SLTIU  -> List(Y,        N,       N,        N,       N,    DC,        RS1,       IMM,       ITYPE,     AluOp.SLTU),
+        SLTI   -> List(Y,        N,       N,        N,       N,    DC,        RS1,       IMM,       ITYPE,     AluOp.SLT),
+        SRAI   -> List(Y,        N,       N,        N,       N,    DC,        RS1,       IMM,       ITYPE,     AluOp.SRA),
+        SRLI   -> List(Y,        N,       N,        N,       N,    DC,        RS1,       IMM,       ITYPE,     AluOp.SRL),
+        SLLI   -> List(Y,        N,       N,        N,       N,    DC,        RS1,       IMM,       ITYPE,     AluOp.SLL),
+        LUI    -> List(Y,        N,       N,        N,       N,    DC,        DC,        IMM,       UTYPE,     AluOp.COPY_B),
+        
     )
 
 
