@@ -1,6 +1,6 @@
 package FiveStage
 
-import chisel3.ExplicitCompileOptions.Strict
+import chisel3.core.ExplicitCompileOptions.Strict
 //todo avoid implicit truncation
 import chisel3._
 import chisel3.core.Input
@@ -37,14 +37,20 @@ class CPU extends MultiIOModule {
         TODO: Your code here
     */
     
-    ID.io.ins:=IF.io.ins
-    ID.io.wdata:=EX.io.wdata
-    ID.io.waddr:=EX.io.waddr
+    ID.io.in.ins:=IF.io.ins
+    ID.io.wdata:=EX.io.out.reg_w_data
+    ID.io.waddr:=EX.io.out.rd
+    ID.io.in.w_rd:=EX.io.out.w_rd
     
-    EX.io.op_0:=ID.io.op_0
-    EX.io.op_1:=ID.io.op_1
-    EX.io.alu_op:=ID.io.alu_op
-    EX.io.dst:=ID.io.dst
+    EX.io.in.op_0:=ID.io.op_0
+    EX.io.in.op_1:=ID.io.op_1
+    EX.io.in.alu_op:=ID.io.alu_op
+    EX.io.in.rd:=ID.io.rd
+    EX.io.in.w_rd:=ID.io.w_rd
+    
+    
+    val dontcare=Wire(UInt(32.W))
+    dontcare:=DontCare
     
     
     // val WB  = Module(new Execute) (You may not need this one?)

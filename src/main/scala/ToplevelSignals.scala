@@ -15,7 +15,7 @@ class Instruction extends Bundle(){
   def funct7      = instruction(31, 25)
   def funct6      = instruction(26, 31)
 
-  def immediateIType = instruction(31, 20).asSInt
+  def immediateIType = instruction(31, 20).asSInt.asTypeOf(SInt(32.W)).asUInt
   def immediateSType = Cat(instruction(31, 25), instruction(11,7)).asSInt
   def immediateBType = Cat(instruction(31), instruction(7), instruction(30, 25), instruction(11, 8), 0.U(1.W)).asSInt
   def immediateUType = Cat(instruction(31, 12), 0.U(12.W)).asSInt
@@ -93,11 +93,11 @@ object Op1Select {
 
 object YN{
     val N = 0.U(1.W) 
-    val Y = 0.U(1.W) 
+    val Y = 1.U(1.W) 
 }
 
 
-object DC{
+object DonotCare{
     val DC=0.U
 }
 
@@ -115,7 +115,7 @@ object ImmFormat {
 }
 
 
-object ALUOps {
+object AluOp {
   val ADD    = 0.U(4.W)
   val SUB    = 1.U(4.W)
   val AND    = 2.U(4.W)
@@ -128,6 +128,9 @@ object ALUOps {
   val SRA    = 9.U(4.W)
   val COPY_A = 10.U(4.W)
   val COPY_B = 11.U(4.W)
+  
+  
+  val INVAILD= 15.U(4.W)
 
   // val DC     = 15.U(4.W)
 }
