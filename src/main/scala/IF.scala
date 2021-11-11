@@ -48,12 +48,13 @@ class InstructionFetch extends MultiIOModule {
     val d_pc=Wire(UInt(30.W))
     IMEM.io.instructionAddress:=Cat(d_pc,0.U(2.W))
     
-    d_pc:=adder_result//fix me
-    current_pc:=d_pc
     
     offset:=1.U
     when(io.stall){
         offset:=0.U
+    }
+    when(ins.asUInt===JAL){
+        offset:=ins.immediateJType(19,2).asSInt.asTypeOf(SInt(30.W)).asUInt
     }
     // when(io.e_branch){
         // offset:=branch_offset
@@ -61,11 +62,10 @@ class InstructionFetch extends MultiIOModule {
     
     adder_result:=current_pc+offset
     
+    current_pc:=d_pc
     
     
-    // when(ins.asUInt===JAL){
-    //     current_pc:=Cat(current_pc+ins.immediateJType(19,2))
-    // }
+    d_pc:=adder_result//fix me
     // when(io.decode_jump.e_jump){
     //     current_pc:=io.decode_jump.jump_addr
     // }

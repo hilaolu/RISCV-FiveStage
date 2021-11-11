@@ -19,7 +19,7 @@ import LogParser._
 
 object Manifest {
 
-  val singleTest = "arithImm.s"
+  val singleTest = "jal.s"
   // val singleTest = "square.s"
 
   val nopPadded = false
