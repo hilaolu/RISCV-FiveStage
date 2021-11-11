@@ -40,7 +40,7 @@ private class ChiselTestRunner (
     
     d.step(5)
     d.poke(d.dut.io.setup, 0)
-    d.reset(1)
+    // d.reset(1)
 
     def disableTestSignals: Unit = {
       d.poke(d.dut.io.DMEMWriteData, 0)
