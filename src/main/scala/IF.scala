@@ -4,36 +4,70 @@ import chisel3._
 import chisel3.experimental.MultiIOModule
 import chisel3.util._
 
+import lookup._
+
+object InstructionFetch {
+    class Jump extends Bundle{
+        val jump_addr=UInt(30.W)
+        val e_jump=Bool()
+    }
+}
+    
+
+
+
 class InstructionFetch extends MultiIOModule {
 
 
-
-    /**
-    * TODO: Add input signals for handling events such as jumps
-
-    * TODO: Add output signal for the instruction. 
-    * The instruction is of type Bundle, which means that you must
-    * use the same syntax used in the testHarness for IMEM setup signals
-    * further up.
-    */
     val io = IO(new Bundle {
-        val ins_addr = Output(UInt())
+        val pc = Output(UInt(30.W))
+        val pc_4=Output(UInt(30.W))
         val ins= Output(new Instruction) 
+        
+        
+        val stall=Input(Bool())
+        
+        val decode_jump=Input(new InstructionFetch.Jump)
     })
     
     val IMEM = Module(new IMEM)
-    val ins_addr = RegInit(UInt(30.W), 0.U)
+    val next_pc = RegInit(UInt(30.W),0.U)
+    val adder_result=Wire(UInt(30.W))
+    val current_pc=RegInit(UInt(30.W),0.U)
+    val offset=Wire(UInt(30.W))
+    
     //addr is 30 bit!!
     
-    io.ins_addr := ins_addr
-    IMEM.io.instructionAddress := Cat(ins_addr,0.U(2.W))
+    io.pc := current_pc 
+    io.pc_4 := adder_result//fix me 
     
-    ins_addr := ins_addr + 1.U
-    
-    val ins = Wire(new Instruction)
-    ins := IMEM.io.instruction.asTypeOf(new Instruction)
+    IMEM.io.instructionAddress := Cat(Mux(io.stall,current_pc,next_pc),0.U(2.W))
+    val ins=IMEM.io.instruction.asTypeOf(new Instruction)
     io.ins:=ins
     
+    current_pc:=next_pc
+    when(io.stall){
+        current_pc:=current_pc
+    }
+    
+    adder_result := next_pc+offset 
+    
+    offset:=1.U//fix me
+    
+    next_pc:=adder_result
+    when(io.stall){
+        next_pc:=next_pc
+    }
+    
+    
+    
+    // when(ins.asUInt===JAL){
+    //     current_pc:=Cat(current_pc+ins.immediateJType(19,2))
+    // }
+    // when(io.decode_jump.e_jump){
+    //     current_pc:=io.decode_jump.jump_addr
+    // }
+        
     
     /**
     * Setup. You should not change this code
@@ -48,7 +82,7 @@ class InstructionFetch extends MultiIOModule {
     IMEM.testHarness.setupSignals := testHarness.IMEMsetup
     testHarness.PC := IMEM.testHarness.requestedAddress
     when(testHarness.IMEMsetup.setup) {
-        ins_addr := 0.U
+        next_pc := 0.U
         ins := Instruction.NOP
     }
   

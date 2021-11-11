@@ -76,6 +76,11 @@ class Registers() extends MultiIOModule {
 
   io.readData1 := 0.U
   io.readData2 := 0.U
-  when(readAddress1 =/= 0.U){ io.readData1 := registerFile(readAddress1) }
-  when(readAddress2 =/= 0.U){ io.readData2 := registerFile(readAddress2) }
+  io.readData1 := registerFile(readAddress1) 
+  io.readData2 := registerFile(readAddress2)
+  
+  when(readAddress1 === writeAddress){io.readData1:=io.writeData}
+  when(readAddress2 === writeAddress){io.readData2:=io.writeData}
+  when(readAddress1 === 0.U){ io.readData1 := 0.U }
+  when(readAddress2 === 0.U){ io.readData2 := 0.U }
 }

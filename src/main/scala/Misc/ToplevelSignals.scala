@@ -16,10 +16,10 @@ class Instruction extends Bundle(){
   def funct6      = instruction(26, 31)
 
   def immediateIType = instruction(31, 20).asSInt.asTypeOf(SInt(32.W)).asUInt
-  def immediateSType = Cat(instruction(31, 25), instruction(11,7)).asSInt
+  def immediateSType = Cat(instruction(31, 25), instruction(11,7)).asSInt.asTypeOf(SInt(32.W)).asUInt
   def immediateBType = Cat(instruction(31), instruction(7), instruction(30, 25), instruction(11, 8), 0.U(1.W)).asSInt
-  def immediateUType = Cat(instruction(31, 12), 0.U(12.W)).asSInt
-  def immediateJType = Cat(instruction(31), instruction(19, 12), instruction(20), instruction(30, 25), instruction(24, 21), 0.U(1.W)).asSInt
+  def immediateUType = Cat(instruction(31, 12), 0.U(12.W)).asUInt
+  def immediateJType = Cat(instruction(31), instruction(19, 12), instruction(20), instruction(30, 25), instruction(24, 21), 0.U(1.W))
   def immediateZType = instruction(19, 15).zext
 
   def bubble(): Instruction = {
@@ -40,8 +40,7 @@ object Instruction {
 
 class ControlSignals extends Bundle(){
   val regWrite   = Bool()
-  val memRead    = Bool()
-  val memWrite   = Bool()
+  val memOp    = Bool()
   val branch     = Bool()
   val jump       = Bool()
 }
@@ -51,8 +50,7 @@ object ControlSignals {
   def nop: ControlSignals = {
     val b = Wire(new ControlSignals)
     b.regWrite   := false.B
-    b.memRead    := false.B
-    b.memWrite   := false.B
+    b.memOp      := false.B
     b.branch     := false.B
     b.jump       := false.B
     b
@@ -80,8 +78,9 @@ object branchType {
   using them altogether.
   */
 object Op0Select {
-  val RS1 = 0.asUInt(1.W)
-  val PC  = 1.asUInt(1.W)
+  val RS1 = 0.asUInt(2.W)
+  val PC  = 1.asUInt(2.W)
+  val PC4 = 2.asUInt(2.W)
   val Z   = 0.U(1.W)
   // val DC  = 0.asUInt(1.W)
 }
@@ -93,8 +92,8 @@ object Op1Select {
 }
 
 object YN{
-    val N = 0.U(1.W) 
-    val Y = 1.U(1.W) 
+    val N = false.B 
+    val Y = true.B 
 }
 
 

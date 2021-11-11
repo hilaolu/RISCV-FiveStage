@@ -10,6 +10,10 @@ def scalacOptionsVersion(scalaVersion: String): Seq[String] = {
   }
 }
 
+// nativeLinkStubs := true
+
+// enablePlugins(ScalaNativePlugin)
+
 def javacOptionsVersion(scalaVersion: String): Seq[String] = {
   Seq() ++ {
     // Scala 2.12 requires Java 8. We continue to generate
@@ -66,4 +70,4 @@ addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.fu
 
 testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-eS")
 
-addCompilerPlugin("io.tryp" % "splain" % "0.4.1" cross CrossVersion.patch)
+addCompilerPlugin("io.tryp" % "splain" % "0.5.8" cross CrossVersion.patch)

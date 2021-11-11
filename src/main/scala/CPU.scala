@@ -25,29 +25,44 @@ class CPU extends MultiIOModule {
     val IF  = Module(new InstructionFetch)
     val EX  = Module(new Execute)
     val MEM = Module(new MemoryFetch)
+    val WB  = Module(new WriteBack)
     
+    val MEMR=Module(new MEMRegs)
     val EXR = Module(new EXRegs)
+    val WBR=Module(new WBRegs)
     
-    /**
-        TODO: Your code here
-    */
+    IF.io.stall:=ID.io.stall
+    IF.io.decode_jump:=ID.io.jump
     
     ID.io.in.ins:=IF.io.ins
-    ID.io.wdata:=EX.io.out.alu_data
-    ID.io.waddr:=EX.io.out.rd
-    ID.io.in.w_rd:=EX.io.out.w_rd
+    ID.io.in.pc:=IF.io.pc
+    ID.io.in.pc_4:=IF.io.pc_4
     
     EXR.io.out<>EX.io.in
     EXR.io.in<>ID.io.out
     
+    MEMR.io.in<>EX.io.out
+    MEMR.io.out<>MEM.io.in    
+    
+    WBR.io.in<>MEM.io.out
+    WBR.io.out<>WB.io.in
+    
+    WB.io.out<>ID.io.wb_in
+    WB.io.in<>WBR.io.out
+    WB.io.mem_data:=MEM.io.mem_data
     
     
+    ID.io.ex_in.reg_data:=EX.io.out.alu_data
+    ID.io.ex_in.rd:=EXR.io.out.rd
+    ID.io.ex_in.w_rd:=EXR.io.out.w_rd
+    ID.io.ex_in.mem_op:=EXR.io.out.mem_op
     
-    val dontcare=Wire(UInt(32.W))
-    dontcare:=DontCare
+    ID.io.mem_in.reg_data:=MEMR.io.out.alu_data
+    ID.io.mem_in.rd:=MEMR.io.out.rd
+    ID.io.mem_in.w_rd:=MEMR.io.out.w_rd
+    ID.io.mem_in.mem_op:=MEMR.io.out.mem_op
     
     
-    // val WB  = Module(new Execute) (You may not need this one?)
     
     {
         /**

@@ -1,6 +1,6 @@
 package FiveStage
 import chisel3._
-import chisel3.util.{ BitPat, MuxCase, MuxLookup }
+import chisel3.util.{ BitPat, MuxCase, MuxLookup, Cat, ListLookup }
 import chisel3.experimental.MultiIOModule
 
 import lookup._
@@ -9,6 +9,7 @@ import Op1Select._
 import ImmFormat._
 import YN._
 import DonotCare.DC
+import InstructionFetch.Jump
 
 
 class InstructionDecode extends MultiIOModule {
@@ -17,9 +18,18 @@ class InstructionDecode extends MultiIOModule {
 
     val io = IO(new Bundle {
         val in=new Bundle{
-            val w_rd=Input(UInt(1.W))
             val ins=Input(new Instruction)
+            val pc=Input(UInt(30.W))
+            val pc_4=Input(UInt(30.W))
         }
+        
+        val wb_in=Input(new WBRegs.Contents)        
+        
+        val ex_in=Input(new WBRegs.Contents)
+        
+        val mem_in=Input(new WBRegs.Contents)
+        
+        val stall=Output(Bool())
         
         val out=new Bundle{
             val op_0=Output(UInt(32.W))
@@ -28,52 +38,113 @@ class InstructionDecode extends MultiIOModule {
             val alu_op=Output(UInt(4.W))
             val rd=Output(UInt(5.W))
             val w_rd=Output(UInt(1.W))
+            
+            val mem_op=Output(Bool())
+            val mem_data=Output(UInt(32.W))
+            
         }
         
-        val waddr=Input(UInt(32.W))
-        val wdata=Input(UInt(32.W))
+        val jump=Output(new Jump)
+        
         
     })
 
     val registers = Module(new Registers)
     val decoder   = Module(new Decoder)
     
+    val reg_rdata_0=Wire(UInt(32.W))
+    val reg_rdata_1=Wire(UInt(32.W))
+    
     val ins=io.in.ins
     
-    io.out.rd:=ins.registerRd
+    val stall=Wire(Bool())
+    
+    
+    reg_rdata_0:=registers.io.readData1
+    when(ins.registerRs1===io.mem_in.rd&&io.mem_in.w_rd){
+        reg_rdata_0:=io.mem_in.reg_data
+    }
+    when(ins.registerRs1===io.ex_in.rd&&io.ex_in.w_rd){
+        reg_rdata_0:=io.ex_in.reg_data
+    }
+    
+    reg_rdata_1:=registers.io.readData2
+    when(ins.registerRs2===io.mem_in.rd&&io.mem_in.w_rd){
+        reg_rdata_1:=io.mem_in.reg_data
+    }
+    when(ins.registerRs2===io.ex_in.rd&&io.ex_in.w_rd){
+        reg_rdata_1:=io.ex_in.reg_data
+    }
     
     val imm_sel = Array(
         ITYPE  -> ins.immediateIType,
         UTYPE  -> ins.immediateUType.asUInt,
-        // STYPE  -> ins.immediateIType.asTypeOf(SInt(32.W)),
+        STYPE  -> ins.immediateSType,
     )
     
     val op_0_sel = Array(
-        RS1    -> registers.io.readData1,
-        PC     -> 0.U,//fix me
+        RS1    -> reg_rdata_0,
+        PC     -> Cat(io.in.pc,0.U(2.W)),
+        PC4    -> Cat(io.in.pc_4,0.U(2.W)),
         Z      -> 0.U,
     )
     
     val imm=MuxLookup(decoder.io.imm_type,1919810.U,imm_sel)
     
     val op_1_sel = Array(
-        RS2    -> registers.io.readData2, 
+        RS2    -> reg_rdata_1, 
         IMM    -> imm,
     )
+    
+    val d_pc_sel = Array(
+        JALR   -> List(Y,ins.immediateIType + reg_rdata_0),
+    )
+    
+    val no_jump=List(N,0.U)
+    
+    val jump=ListLookup(
+        ins.asUInt,
+        no_jump,
+        d_pc_sel
+    )
+    
+    io.jump.e_jump:=jump(0)
+    io.jump.jump_addr:=jump(1)
+    
+    
+    
+    
+
     
     
     io.out.op_0:=MuxLookup(decoder.io.op_0_type,114514.U,op_0_sel)
     
     io.out.op_1:=MuxLookup(decoder.io.op_1_type,114514.U,op_1_sel)
     
+    io.out.mem_data:=reg_rdata_1
+    
     registers.io.readAddress1 := ins.registerRs1 
     registers.io.readAddress2 := ins.registerRs2
-    registers.io.writeEnable  := io.in.w_rd
-    registers.io.writeAddress := io.waddr 
-    registers.io.writeData    := io.wdata 
+    registers.io.writeEnable  := io.wb_in.w_rd
+    registers.io.writeAddress := io.wb_in.rd 
+    registers.io.writeData    := io.wb_in.reg_data 
     
     io.out.alu_op:=decoder.io.alu_op
-    io.out.w_rd:=decoder.io.ctrl_signal.regWrite
+    
+    
+    
+    stall:=(
+        ((ins.registerRs1===io.ex_in.rd|ins.registerRs2===io.ex_in.rd)&&io.ex_in.mem_op&&io.ex_in.w_rd)|
+        ((ins.registerRs1===io.mem_in.rd|ins.registerRs2===io.mem_in.rd)&&io.mem_in.mem_op&&io.mem_in.w_rd)
+    )
+    // stall:=false.B
+    io.out.rd:=Mux(decoder.io.ctrl_signal.regWrite|stall,ins.registerRd,0.U)
+        
+    io.out.w_rd:=Mux(stall,false.B,decoder.io.ctrl_signal.regWrite)
+    io.out.mem_op:=Mux(stall,false.B,decoder.io.ctrl_signal.memOp)
+    io.stall:=stall
+    
+    //Warning: add a '&&w_rd' ??
     
     decoder.io.ins := ins    
     // Don't touch the test harness
