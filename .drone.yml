@@ -3,7 +3,7 @@ type: docker
 name: default
 
 steps:
-- name: greeting
+- name: testall
   image: hseeberger/scala-sbt:8u222_1.3.5_2.13.1
   commands:
   - sbt test 
