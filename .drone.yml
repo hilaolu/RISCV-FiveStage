@@ -20,12 +20,12 @@ steps:
   - echo "$(hostname)" 
 
 ---
-kind:pipeline
-type:docker
-name:final
+kind: pipeline
+type: docker
+name: final
 
 steps:
-- name:finish
+- name: finish
   image: hseeberger/scala-sbt:8u222_1.3.5_2.13.1
   commands:
   - echo "bye" 
