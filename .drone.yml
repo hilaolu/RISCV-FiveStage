@@ -4,6 +4,17 @@ name: default
 
 steps:
 - name: SomeTests 
-  image: hseeberger/scala-sbt:8u222_1.3.5_2.13.1
-  commands:
-  - sbt "testOnly FiveStage.SomeTests"
+    image: hseeberger/scala-sbt:8u222_1.3.5_2.13.1
+    commands:
+    - sbt "testOnly FiveStage.SomeTests"
+
+---
+kind: pipeline
+type: docker
+name: another_pipeline
+
+steps:
+- name: Ping
+    image: hseeberger/scala-sbt:8u222_1.3.5_2.13.1
+    commands:
+    - echo "$(hostname)" 
