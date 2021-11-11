@@ -59,11 +59,11 @@ object ControlSignals {
 
 
 object branchType {
-  val beq  = 0.asUInt(3.W)
-  val neq  = 1.asUInt(3.W)
-  val gte  = 2.asUInt(3.W)
+  val eq  = 0.asUInt(3.W)
+  val ne  = 1.asUInt(3.W)
+  val ge  = 2.asUInt(3.W)
   val lt   = 3.asUInt(3.W)
-  val gteu = 4.asUInt(3.W)
+  val geu = 4.asUInt(3.W)
   val ltu  = 5.asUInt(3.W)
   val jump = 6.asUInt(3.W)
   // val DC   = 0.asUInt(3.W)

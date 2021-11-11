@@ -31,6 +31,9 @@ class InstructionDecode extends MultiIOModule {
         
         val stall=Output(Bool())
         
+        val e_branch=Output(Bool())
+        val branch_offset=Output(UInt(30.W))
+        
         val out=new Bundle{
             val op_0=Output(UInt(32.W))
             val op_1=Output(UInt(32.W))
@@ -76,6 +79,9 @@ class InstructionDecode extends MultiIOModule {
         reg_rdata_1:=io.ex_in.reg_data
     }
     
+    val op_0=reg_rdata_0
+    val op_1=reg_rdata_1
+    
     val imm_sel = Array(
         ITYPE  -> ins.immediateIType,
         UTYPE  -> ins.immediateUType.asUInt,
@@ -108,6 +114,30 @@ class InstructionDecode extends MultiIOModule {
         d_pc_sel
     )
     
+    val e_branch_sel=Array(
+        branchType.eq  ->(op_0===op_1),
+        branchType.ne  ->(op_0=/=op_1),
+        branchType.ge  ->(op_0.asSInt>op_1.asSInt),
+        branchType.lt  ->(op_0.asSInt<op_1.asSInt),
+        branchType.geu ->(op_0>op_1),
+        branchType.ltu ->(op_0<op_1),
+        branchType.jump->false.B
+    )
+    
+    val e_branch=
+        MuxLookup(decoder.io.branch_type,false.B,e_branch_sel)&&
+        decoder.io.ctrl_signal.branch 
+        
+    val clear=RegInit(Bool(),false.B)
+    clear:=e_branch
+    
+    val branch_offset=
+        io.in.pc+
+        ins.immediateBType(12,2).asTypeOf(SInt(30.W)).asUInt
+        
+    io.e_branch:=e_branch
+    io.branch_offset:=branch_offset
+    
     io.jump.e_jump:=jump(0)
     io.jump.jump_addr:=jump(1)
     
@@ -131,7 +161,7 @@ class InstructionDecode extends MultiIOModule {
     
     io.out.alu_op:=decoder.io.alu_op
     
-    
+    val nullify=stall|clear
     
     stall:=(
         ((ins.registerRs1===io.ex_in.rd|ins.registerRs2===io.ex_in.rd)&&io.ex_in.mem_op&&io.ex_in.w_rd)|
@@ -140,8 +170,8 @@ class InstructionDecode extends MultiIOModule {
     // stall:=false.B
     io.out.rd:=Mux(decoder.io.ctrl_signal.regWrite|stall,ins.registerRd,0.U)
         
-    io.out.w_rd:=Mux(stall,false.B,decoder.io.ctrl_signal.regWrite)
-    io.out.mem_op:=Mux(stall,false.B,decoder.io.ctrl_signal.memOp)
+    io.out.w_rd:=Mux(nullify,false.B,decoder.io.ctrl_signal.regWrite)
+    io.out.mem_op:=Mux(nullify,false.B,decoder.io.ctrl_signal.memOp)
     io.stall:=stall
     
     //Warning: add a '&&w_rd' ??

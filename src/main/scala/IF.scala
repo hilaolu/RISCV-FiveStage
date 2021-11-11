@@ -20,18 +20,22 @@ class InstructionFetch extends MultiIOModule {
 
 
     val io = IO(new Bundle {
+        val stall=Input(Bool())
+        // val e_branch=input(bool())
+        // val branch_offset=input(uint(30.w))
+        
+        
         val pc = Output(UInt(30.W))
         val pc_4=Output(UInt(30.W))
         val ins= Output(new Instruction) 
         
         
-        val stall=Input(Bool())
         
         val decode_jump=Input(new InstructionFetch.Jump)
     })
     
     val IMEM = Module(new IMEM)
-    val next_pc = RegInit(UInt(30.W),0.U)
+    val s_pc = RegInit(UInt(30.W),(-1).S.asTypeOf(SInt(30.W)).asUInt)
     val adder_result=Wire(UInt(30.W))
     val current_pc=RegInit(UInt(30.W),0.U)
     val offset=Wire(UInt(30.W))
@@ -41,22 +45,29 @@ class InstructionFetch extends MultiIOModule {
     io.pc := current_pc 
     io.pc_4 := adder_result//fix me 
     
-    IMEM.io.instructionAddress := Cat(Mux(io.stall,current_pc,next_pc),0.U(2.W))
+    IMEM.io.instructionAddress := Cat(Mux(io.stall,current_pc,s_pc),0.U(2.W))
     val ins=IMEM.io.instruction.asTypeOf(new Instruction)
     io.ins:=ins
     
-    current_pc:=next_pc
+    val d_pc=Wire(UInt(30.W))
+    
+    d_pc:=s_pc
+    when(io.stall){
+        d_pc:=current_pc
+    }
+    
+    current_pc:=s_pc
     when(io.stall){
         current_pc:=current_pc
     }
     
-    adder_result := next_pc+offset 
+    adder_result := s_pc+offset 
     
     offset:=1.U//fix me
     
-    next_pc:=adder_result
+    s_pc:=adder_result
     when(io.stall){
-        next_pc:=next_pc
+        s_pc:=s_pc
     }
     
     
@@ -82,7 +93,7 @@ class InstructionFetch extends MultiIOModule {
     IMEM.testHarness.setupSignals := testHarness.IMEMsetup
     testHarness.PC := IMEM.testHarness.requestedAddress
     when(testHarness.IMEMsetup.setup) {
-        next_pc := 0.U
+        s_pc := 0.U
         ins := Instruction.NOP
     }
   
