@@ -77,17 +77,16 @@ object branchType {
   You can choose to instead do this in the execute stage, and you may forego
   using them altogether.
   */
-object Op0Select {
-  val RS1 = 0.asUInt(2.W)
-  val PC  = 1.asUInt(2.W)
-  val PC4 = 2.asUInt(2.W)
-  val Z   = 0.U(1.W)
+object Op1Select {
+  val RS1 = 0.asUInt(1.W)
+  val PC  = 1.asUInt(1.W)
   // val DC  = 0.asUInt(1.W)
 }
 
-object Op1Select {
-  val RS2 = 0.asUInt(1.W)
-  val IMM = 1.asUInt(1.W)
+object Op2Select {
+  val RS2 = 0.asUInt(2.W)
+  val IMM = 1.asUInt(2.W)
+  val N4  = 2.asUInt(2.W)
   // val DC  = 0.asUInt(1.W)
 }
 

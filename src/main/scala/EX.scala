@@ -10,8 +10,8 @@ class Execute extends MultiIOModule {
   val io = IO(
     new Bundle {
         val in=new Bundle{
-            val op_0 = Input(UInt(32.W)) 
             val op_1 = Input(UInt(32.W)) 
+            val op_2 = Input(UInt(32.W)) 
             val alu_op= Input(UInt(4.W))
             val rd= Input(UInt(5.W))
             val w_rd=Input(UInt(1.W))
@@ -31,18 +31,18 @@ class Execute extends MultiIOModule {
     })
     
     val ALUopMap = Array(
-        ADD    -> (io.in.op_0 + io.in.op_1),
-        SUB    -> (io.in.op_0 - io.in.op_1), //todo use complement code
-        AND    -> (io.in.op_0 & io.in.op_1),
-        OR     -> (io.in.op_0 | io.in.op_1),
-        XOR    -> (io.in.op_0 ^ io.in.op_1),
-        SLTU   -> (io.in.op_0 < io.in.op_1),
-        SLT    -> (io.in.op_0.asSInt < io.in.op_1.asSInt),
-        SRA    -> (io.in.op_0.asSInt >> io.in.op_1(4,0)).asUInt,
-        SRL    -> (io.in.op_0 >> io.in.op_1(4,0)),
-        SLL    -> (io.in.op_0 << io.in.op_1(4,0)),
-        COPY_B -> (io.in.op_1),
-        COPY_A -> (io.in.op_0),
+        ADD    -> (io.in.op_1 + io.in.op_2),
+        SUB    -> (io.in.op_1 - io.in.op_2), //todo use complement code
+        AND    -> (io.in.op_1 & io.in.op_2),
+        OR     -> (io.in.op_1 | io.in.op_2),
+        XOR    -> (io.in.op_1 ^ io.in.op_2),
+        SLTU   -> (io.in.op_1 < io.in.op_2),
+        SLT    -> (io.in.op_1.asSInt < io.in.op_2.asSInt),
+        SRA    -> (io.in.op_1.asSInt >> io.in.op_2(4,0)).asUInt,
+        SRL    -> (io.in.op_1 >> io.in.op_2(4,0)),
+        SLL    -> (io.in.op_1 << io.in.op_2(4,0)),
+        COPY_B -> (io.in.op_2),
+        COPY_A -> (io.in.op_1),
     )
     
     io.out.alu_data := MuxLookup(io.in.alu_op, 0.U(32.W), ALUopMap)

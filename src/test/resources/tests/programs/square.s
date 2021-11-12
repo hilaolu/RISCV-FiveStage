@@ -17,6 +17,7 @@ main:
 	add	a5,a4,a5
 	mv	a0,a5
 	call	square
+	done
 	mv	s1,a0
 	lw	a4,-28(s0)
 	lw	a5,-32(s0)
@@ -71,6 +72,7 @@ square:
 	sw	a0,-20(s0)
 	lw	a1,-20(s0)
 	lw	a0,-20(s0)
+	done
 	call	mul
 	mv	a5,a0
 	mv	a0,a5

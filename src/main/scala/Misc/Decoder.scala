@@ -10,15 +10,15 @@ class Decoder() extends Module {
 
         val ctrl_signal    = Output(new ControlSignals)
         val imm_type       = Output(UInt(3.W))
-        val op_0_type      = Output(UInt(1.W))
         val op_1_type      = Output(UInt(1.W))
+        val op_2_type      = Output(UInt(1.W))
         val alu_op         = Output(UInt(4.W))
         val branch_type    = Output(UInt())
     })
 
     import lookup._
-    import Op0Select._
     import Op1Select._
+    import Op2Select._
     import ImmFormat._
     import YN._
     import DonotCare._
@@ -54,10 +54,15 @@ class Decoder() extends Module {
         LUI    -> List(Y,        N,        N,       N,    DC,        DC,        IMM,       UTYPE,     AluOp.COPY_B),
         AUIPC  -> List(Y,        N,        N,       N,    DC,        PC,        IMM,       UTYPE,     AluOp.ADD),
         
-        JAL    -> List(Y,        N,        N,       N,    DC,        PC4,       DC,        DC,        AluOp.COPY_A),
-        JALR   -> List(Y,        N,        N,       N,    DC,        PC4,       DC,        ITYPE,     AluOp.COPY_A),
+        JAL    -> List(Y,        N,        N,       Y,    DC,        PC,        N4,        DC,        AluOp.ADD),
+        JALR   -> List(Y,        N,        N,       Y,    DC,        PC,        N4,        DC,        AluOp.ADD),
         
-        BLT    -> List(N,        N,        N,       N,    DC,        DC,        DC,        DC,        DC),   
+        BLT    -> List(N,        N,        Y,       N,    DC,        DC,        DC,        DC,        DC),   
+        BLTU   -> List(N,        N,        Y,       N,    DC,        DC,        DC,        DC,        DC),   
+        BEQ    -> List(N,        N,        Y,       N,    DC,        DC,        DC,        DC,        DC),   
+        BGE    -> List(N,        N,        Y,       N,    DC,        DC,        DC,        DC,        DC),   
+        BGEU   -> List(N,        N,        Y,       N,    DC,        DC,        DC,        DC,        DC),   
+        BNE    -> List(N,        N,        Y,       N,    DC,        DC,        DC,        DC,        DC),   
         
     )
 
@@ -83,8 +88,8 @@ class Decoder() extends Module {
     io.ctrl_signal.jump       := decodedControlSignals(3)
     
     io.branch_type:= decodedControlSignals(4)
-    io.op_0_type  := decodedControlSignals(5)
-    io.op_1_type  := decodedControlSignals(6)
+    io.op_1_type  := decodedControlSignals(5)
+    io.op_2_type  := decodedControlSignals(6)
     io.imm_type   := decodedControlSignals(7)
     io.alu_op     := decodedControlSignals(8)
 }

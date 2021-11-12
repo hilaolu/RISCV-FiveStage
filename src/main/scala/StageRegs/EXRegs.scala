@@ -7,8 +7,8 @@ import FiveStage.AluOp._
 
 object EXRegs {
     class Contents extends Bundle{
-        val op_0 = UInt(32.W) 
         val op_1 = UInt(32.W) 
+        val op_2 = UInt(32.W) 
         val alu_op= UInt(4.W)
         val rd= UInt(5.W)
         val w_rd=UInt(1.W)

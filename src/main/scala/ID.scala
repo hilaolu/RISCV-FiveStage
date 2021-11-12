@@ -4,8 +4,8 @@ import chisel3.util.{ BitPat, MuxCase, MuxLookup, Cat, ListLookup }
 import chisel3.experimental.MultiIOModule
 
 import lookup._
-import Op0Select._
 import Op1Select._
+import Op2Select._
 import ImmFormat._
 import YN._
 import DonotCare.DC
@@ -35,8 +35,8 @@ class InstructionDecode extends MultiIOModule {
         val branch_offset=Output(UInt(30.W))
         
         val out=new Bundle{
-            val op_0=Output(UInt(32.W))
             val op_1=Output(UInt(32.W))
+            val op_2=Output(UInt(32.W))
             
             val alu_op=Output(UInt(4.W))
             val rd=Output(UInt(5.W))
@@ -79,8 +79,8 @@ class InstructionDecode extends MultiIOModule {
         reg_rdata_1:=io.ex_in.reg_data
     }
     
-    val op_0=reg_rdata_0
-    val op_1=reg_rdata_1
+    val op_1=reg_rdata_0
+    val op_2=reg_rdata_1
     
     val imm_sel = Array(
         ITYPE  -> ins.immediateIType,
@@ -88,22 +88,22 @@ class InstructionDecode extends MultiIOModule {
         STYPE  -> ins.immediateSType,
     )
     
-    val op_0_sel = Array(
+    val op_1_sel = Array(
         RS1    -> reg_rdata_0,
         PC     -> Cat(io.in.pc,0.U(2.W)),
-        PC4    -> Cat(io.in.pc_4,0.U(2.W)),
-        Z      -> 0.U,
     )
     
     val imm=MuxLookup(decoder.io.imm_type,1919810.U,imm_sel)
     
-    val op_1_sel = Array(
+    val op_2_sel = Array(
         RS2    -> reg_rdata_1, 
         IMM    -> imm,
+        N4     -> 4.U,
     )
     
     val d_pc_sel = Array(
         JALR   -> List(Y,ins.immediateIType + reg_rdata_0),
+        // JAL    -> List(Y,io.in.pc+ins.immediateIType)
     )
     
     val no_jump=List(N,0.U)
@@ -115,12 +115,12 @@ class InstructionDecode extends MultiIOModule {
     )
     
     val e_branch_sel=Array(
-        branchType.eq  ->(op_0===op_1),
-        branchType.ne  ->(op_0=/=op_1),
-        branchType.ge  ->(op_0.asSInt>op_1.asSInt),
-        branchType.lt  ->(op_0.asSInt<op_1.asSInt),
-        branchType.geu ->(op_0>op_1),
-        branchType.ltu ->(op_0<op_1),
+        branchType.eq  ->(op_1===op_2),
+        branchType.ne  ->(op_1=/=op_2),
+        branchType.ge  ->(op_1.asSInt>op_2.asSInt),
+        branchType.lt  ->(op_1.asSInt<op_2.asSInt),
+        branchType.geu ->(op_1>op_2),
+        branchType.ltu ->(op_1<op_2),
         branchType.jump->false.B
     )
     
@@ -147,9 +147,9 @@ class InstructionDecode extends MultiIOModule {
 
     
     
-    io.out.op_0:=MuxLookup(decoder.io.op_0_type,114514.U,op_0_sel)
-    
     io.out.op_1:=MuxLookup(decoder.io.op_1_type,114514.U,op_1_sel)
+    
+    io.out.op_2:=MuxLookup(decoder.io.op_2_type,114514.U,op_2_sel)
     
     io.out.mem_data:=reg_rdata_1
     
