@@ -66,9 +66,9 @@ class InstructionFetch extends MultiIOModule {
     
     
     d_pc:=adder_result//fix me
-    // when(io.decode_jump.e_jump){
-    //     current_pc:=io.decode_jump.jump_addr
-    // }
+    when(io.decode_jump.e_jump){
+        d_pc:=io.decode_jump.jump_addr
+    }
         
     
     /**
