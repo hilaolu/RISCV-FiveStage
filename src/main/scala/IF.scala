@@ -21,8 +21,8 @@ class InstructionFetch extends MultiIOModule {
 
     val io = IO(new Bundle {
         val stall=Input(Bool())
-        // val e_branch=input(bool())
-        // val branch_offset=input(uint(30.w))
+        val e_branch=Input(Bool())
+        val branch_offset=Input(UInt(30.W))
         
         
         val pc = Output(UInt(30.W))
@@ -56,9 +56,9 @@ class InstructionFetch extends MultiIOModule {
     when(ins.asUInt===JAL){
         offset:=ins.immediateJType(19,2).asSInt.asTypeOf(SInt(30.W)).asUInt
     }
-    // when(io.e_branch){
-        // offset:=branch_offset
-    // }
+    when(io.e_branch){
+        offset:=io.branch_offset
+    }
     
     adder_result:=current_pc+offset
     

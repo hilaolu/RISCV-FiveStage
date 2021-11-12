@@ -33,6 +33,8 @@ class CPU extends MultiIOModule {
     
     IF.io.stall:=ID.io.stall
     IF.io.decode_jump:=ID.io.jump
+    IF.io.e_branch:=ID.io.e_branch
+    IF.io.branch_offset:=ID.io.branch_offset
     
     ID.io.in.ins:=IF.io.ins
     ID.io.in.pc:=IF.io.pc
