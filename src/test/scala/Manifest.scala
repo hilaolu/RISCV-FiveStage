@@ -20,7 +20,7 @@ import LogParser._
 object Manifest {
 
   // val singleTest = "jal.s"
-  val singleTest = "square.s"
+  val singleTest = "palindrome.s"
 
   val nopPadded = false
 
@@ -67,7 +67,14 @@ class SomeTests extends FlatSpec with Matchers {
             "arith.s",
             "add.s",
             "constants.s",
-            "square.s"
+            "square.s",
+            "memoFib.s",
+            "palindrome.s",
+            "palindromeO3.s",
+            "BTreeManyO3.s",
+            "searchRegularO0.s",
+            "naiveFib.s",
+            "BTreeO3.s"
         )
         val werks = completed.filterNot(_ == "convolution.s").map{testname => 
             say(s"testing $testname")
