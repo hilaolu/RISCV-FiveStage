@@ -53,9 +53,6 @@ class InstructionFetch extends MultiIOModule {
     when(io.stall){
         offset:=0.U
     }
-    when(ins.asUInt===JAL){
-        offset:=ins.immediateJType(19,2).asSInt.asTypeOf(SInt(30.W)).asUInt
-    }
     when(io.e_branch){
         offset:=io.branch_offset
     }

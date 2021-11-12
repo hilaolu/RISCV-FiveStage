@@ -55,32 +55,32 @@ class InstructionDecode extends MultiIOModule {
     val registers = Module(new Registers)
     val decoder   = Module(new Decoder)
     
-    val reg_rdata_0=Wire(UInt(32.W))
     val reg_rdata_1=Wire(UInt(32.W))
+    val reg_rdata_2=Wire(UInt(32.W))
     
     val ins=io.in.ins
     
     val stall=Wire(Bool())
     
     
-    reg_rdata_0:=registers.io.readData1
+    reg_rdata_1:=registers.io.readData1
     when(ins.registerRs1===io.mem_in.rd&&io.mem_in.w_rd){
-        reg_rdata_0:=io.mem_in.reg_data
-    }
-    when(ins.registerRs1===io.ex_in.rd&&io.ex_in.w_rd){
-        reg_rdata_0:=io.ex_in.reg_data
-    }
-    
-    reg_rdata_1:=registers.io.readData2
-    when(ins.registerRs2===io.mem_in.rd&&io.mem_in.w_rd){
         reg_rdata_1:=io.mem_in.reg_data
     }
-    when(ins.registerRs2===io.ex_in.rd&&io.ex_in.w_rd){
+    when(ins.registerRs1===io.ex_in.rd&&io.ex_in.w_rd){
         reg_rdata_1:=io.ex_in.reg_data
     }
     
-    val op_1=reg_rdata_0
-    val op_2=reg_rdata_1
+    reg_rdata_2:=registers.io.readData2
+    when(ins.registerRs2===io.mem_in.rd&&io.mem_in.w_rd){
+        reg_rdata_2:=io.mem_in.reg_data
+    }
+    when(ins.registerRs2===io.ex_in.rd&&io.ex_in.w_rd){
+        reg_rdata_2:=io.ex_in.reg_data
+    }
+    
+    val op_1=reg_rdata_1
+    val op_2=reg_rdata_2
     
     val imm_sel = Array(
         ITYPE  -> ins.immediateIType,
@@ -89,21 +89,21 @@ class InstructionDecode extends MultiIOModule {
     )
     
     val op_1_sel = Array(
-        RS1    -> reg_rdata_0,
+        RS1    -> reg_rdata_1,
         PC     -> Cat(io.in.pc,0.U(2.W)),
     )
     
     val imm=MuxLookup(decoder.io.imm_type,1919810.U,imm_sel)
     
     val op_2_sel = Array(
-        RS2    -> reg_rdata_1, 
+        RS2    -> reg_rdata_2, 
         IMM    -> imm,
         N4     -> 4.U,
     )
     
     val d_pc_sel = Array(
-        JALR   -> List(Y,ins.immediateIType + reg_rdata_0),
-        // JAL    -> List(Y,io.in.pc+ins.immediateIType)
+        JALR   -> List(Y,(ins.immediateIType + reg_rdata_1)(31,2)),
+        JAL    -> List(Y,io.in.pc+ins.immediateJType(19,2).asSInt.asTypeOf(SInt(30.W)).asUInt) //todo pass the addend to if
     )
     
     val no_jump=List(N,0.U)
@@ -126,19 +126,16 @@ class InstructionDecode extends MultiIOModule {
     
     val e_branch=
         MuxLookup(decoder.io.branch_type,false.B,e_branch_sel)&&
-        decoder.io.ctrl_signal.branch 
+        decoder.io.ctrl_signal.branch&&
+        (!stall) 
         
-    val clear=RegInit(Bool(),false.B)
-    clear:=e_branch
     
-    val branch_offset=
-        io.in.pc+
-        ins.immediateBType(12,2).asTypeOf(SInt(30.W)).asUInt
+    val branch_offset=ins.immediateBType(12,2).asTypeOf(SInt(30.W)).asUInt
         
     io.e_branch:=e_branch
     io.branch_offset:=branch_offset
     
-    io.jump.e_jump:=jump(0)
+    io.jump.e_jump:=jump(0) & (!stall)
     io.jump.jump_addr:=jump(1)
     
     
@@ -151,7 +148,7 @@ class InstructionDecode extends MultiIOModule {
     
     io.out.op_2:=MuxLookup(decoder.io.op_2_type,114514.U,op_2_sel)
     
-    io.out.mem_data:=reg_rdata_1
+    io.out.mem_data:=reg_rdata_2
     
     registers.io.readAddress1 := ins.registerRs1 
     registers.io.readAddress2 := ins.registerRs2
@@ -161,7 +158,7 @@ class InstructionDecode extends MultiIOModule {
     
     io.out.alu_op:=decoder.io.alu_op
     
-    val nullify=stall|clear
+    val nullify=stall
     
     stall:=(
         ((ins.registerRs1===io.ex_in.rd|ins.registerRs2===io.ex_in.rd)&&io.ex_in.mem_op&&io.ex_in.w_rd)|
@@ -170,13 +167,18 @@ class InstructionDecode extends MultiIOModule {
     // stall:=false.B
     io.out.rd:=Mux(decoder.io.ctrl_signal.regWrite|stall,ins.registerRd,0.U)
         
-    io.out.w_rd:=Mux(nullify,false.B,decoder.io.ctrl_signal.regWrite)
+    io.out.w_rd:=Mux(nullify|ins.registerRd===0.U,false.B,decoder.io.ctrl_signal.regWrite) //fix me remove last cond
     io.out.mem_op:=Mux(nullify,false.B,decoder.io.ctrl_signal.memOp)
     io.stall:=stall
     
     //Warning: add a '&&w_rd' ??
     
     decoder.io.ins := ins    
+    when(stall){
+        io.out.op_1:=0.U
+        io.out.op_2:=0.U
+        io.out.rd:=0.U
+    }
     // Don't touch the test harness
     val testHarness = IO(
         new Bundle {

@@ -66,7 +66,8 @@ class SomeTests extends FlatSpec with Matchers {
             "addi.s",
             "arith.s",
             "add.s",
-            "constants.s"
+            "constants.s",
+            "square.s"
         )
         val werks = completed.filterNot(_ == "convolution.s").map{testname => 
             say(s"testing $testname")
