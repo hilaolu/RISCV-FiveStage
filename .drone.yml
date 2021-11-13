@@ -8,6 +8,10 @@ steps:
   commands:
   - sbt "testOnly FiveStage.SomeTests"
 
+metadata:
+  labels:
+    memory:4GiB
+
 ---
 kind: pipeline
 type: docker
