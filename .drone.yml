@@ -8,9 +8,8 @@ steps:
   commands:
   - sbt "testOnly FiveStage.SomeTests"
 
-metadata:
-  labels:
-    memory:4GiB
+node_selector:
+  memory:4GiB
 
 ---
 kind: pipeline
