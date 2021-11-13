@@ -4,7 +4,8 @@ name: main
 
 resources:
   request:
-    memory: 1.5GiB
+    cpu: 2000
+    memory: 2GiB
 
 
 steps:
