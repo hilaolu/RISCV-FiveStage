@@ -11,6 +11,13 @@ steps:
 node_selector:
   memory:4GiB
 
+resources:
+  request:
+    cpu: 1000
+    memory: 2048MiB
+  limit:
+    cpu: 4000
+    memory: 4GiB
 ---
 kind: pipeline
 type: docker
