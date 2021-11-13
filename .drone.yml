@@ -1,8 +1,11 @@
 kind: pipeline
 type: docker
 name: main
-concurrency:
-  limit: 1
+
+resources:
+  request:
+    memory: 1.5GiB
+
 
 steps:
 - name: SomeTests
