@@ -1,6 +1,8 @@
 kind: pipeline
 type: docker
 name: main
+concurrency:
+  limit: 1
 
 steps:
 - name: SomeTests
@@ -12,6 +14,7 @@ steps:
 kind: pipeline
 type: docker
 name: another_pipeline
+
 
 steps:
 - name: Ping
