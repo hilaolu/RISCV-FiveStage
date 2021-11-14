@@ -4,7 +4,7 @@ name: main
 
 steps:
 - name: SomeTests
-  image: phyzaitlu/jdk:dragonwell 
+  image: phyzaitlu/sbt:dragonwell 
   commands:
   - sbt "testOnly FiveStage.SomeTests"
 
@@ -15,7 +15,7 @@ name: another_pipeline
 
 steps:
 - name: Ping
-  image: phyzaitlu/jdk:dragonwell
+  image: phyzaitlu/sbt:dragonwell
   commands:
   - echo "$(hostname)" 
 
@@ -26,7 +26,7 @@ name: final
 
 steps:
 - name: finish
-  image: phyzaitlu/jdk:dragonwell
+  image: phyzaitlu/sbt:dragonwell
   commands:
   - echo "bye" 
 
