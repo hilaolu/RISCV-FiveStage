@@ -4,7 +4,7 @@ name: main
 
 steps:
 - name: SomeTests
-  image: hseeberger/scala-sbt:8u222_1.3.5_2.13.1
+  image: phyzaitlu/sbt:zulu 
   commands:
   - sbt "testOnly FiveStage.SomeTests"
 
@@ -15,7 +15,7 @@ name: another_pipeline
 
 steps:
 - name: Ping
-  image: hseeberger/scala-sbt:8u222_1.3.5_2.13.1
+  image: phyzaitlu/sbt:zulu 
   commands:
   - echo "$(hostname)" 
 
@@ -26,7 +26,7 @@ name: final
 
 steps:
 - name: finish
-  image: hseeberger/scala-sbt:8u222_1.3.5_2.13.1
+  image: phyzaitlu/sbt:zulu 
   commands:
   - echo "bye" 
 
