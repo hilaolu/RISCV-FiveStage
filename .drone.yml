@@ -2,9 +2,15 @@ kind: pipeline
 type: docker
 name: main
 
+resources:
+  request:
+    cpu: 2000
+    memory: 2GiB
+
+
 steps:
 - name: SomeTests
-  image: hseeberger/scala-sbt:8u222_1.3.5_2.13.1
+  image: phyzaitlu/sbt:debian_openj9
   commands:
   - sbt "testOnly FiveStage.SomeTests"
 
@@ -23,9 +29,10 @@ kind: pipeline
 type: docker
 name: another_pipeline
 
+
 steps:
 - name: Ping
-  image: hseeberger/scala-sbt:8u222_1.3.5_2.13.1
+  image: phyzaitlu/sbt:debian_openj9
   commands:
   - echo "$(hostname)" 
 
@@ -36,7 +43,7 @@ name: final
 
 steps:
 - name: finish
-  image: hseeberger/scala-sbt:8u222_1.3.5_2.13.1
+  image: phyzaitlu/sbt:debian_openj9
   commands:
   - echo "bye" 
 
