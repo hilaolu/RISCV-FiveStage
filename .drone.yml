@@ -2,15 +2,11 @@ kind: pipeline
 type: docker
 name: main
 
-resources:
-  request:
-    cpu: 2000
-    memory: 2GiB
 
 
 steps:
 - name: SomeTests
-  image: phyzaitlu/sbt:debian_openj9
+  image: phyzaitlu/sbt:zulu
   commands:
   - sbt "testOnly FiveStage.SomeTests"
 
@@ -32,7 +28,7 @@ name: another_pipeline
 
 steps:
 - name: Ping
-  image: phyzaitlu/sbt:debian_openj9
+  image: phyzaitlu/sbt:zulu
   commands:
   - echo "$(hostname)" 
 
@@ -43,7 +39,7 @@ name: final
 
 steps:
 - name: finish
-  image: phyzaitlu/sbt:debian_openj9
+  image: phyzaitlu/sbt:zulu
   commands:
   - echo "bye" 
 
