@@ -1,3 +1,4 @@
+mkdir ~/.sbt -p
 
 cat > ~/.sbt/repositories << EOF
 [repositories]
