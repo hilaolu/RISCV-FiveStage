@@ -34,7 +34,7 @@ object Manifest {
     nopPadded          = nopPadded,
     breakPoints        = Nil, // not implemented
     testName           = singleTest,
-    maxSteps           = 15000)
+    maxSteps           = 1500)
 
 
   val allTestOptions: String => TestOptions = name => TestOptions(
@@ -48,7 +48,7 @@ object Manifest {
     nopPadded          = nopPadded,
     breakPoints        = Nil, // not implemented
     testName           = name,
-    maxSteps           = 15000)
+    maxSteps           = 1500)
 
 }
 

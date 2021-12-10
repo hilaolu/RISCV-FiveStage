@@ -4,7 +4,7 @@ import mill._, scalalib._
   * included.
   */
 trait ChiselModule extends ScalaModule {
-    def scalaVersion = "2.12.8"
+    def scalaVersion = "2.12.13"
     def fs2Version = "1.0.0"
     def catsVersion = "1.4.0"
     def catsEffectVersion = "1.0.0"
@@ -39,7 +39,7 @@ trait ChiselModule extends ScalaModule {
       ivy"org.scalamacros:::paradise:2.1.1",
       ivy"com.olegpy::better-monadic-for:0.2.4",
       ivy"org.spire-math::kind-projector:0.9.7",
-      ivy"io.tryp:::splain:0.4.+"
+    //   ivy"io.tryp:::splain:0.4.+"
       )
       
       object test extends Tests {

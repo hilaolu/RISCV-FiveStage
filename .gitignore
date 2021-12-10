@@ -3,6 +3,7 @@
 .vscode/**
 out/**
 .bloop/**
+wavefroms/**
 
 ### Project Specific stuff
 test_run_dir/*
